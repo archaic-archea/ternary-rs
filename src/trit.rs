@@ -1,14 +1,29 @@
 #[derive(PartialEq, Eq, PartialOrd, Clone, Copy, Debug)]
 pub enum Trit {
     /// Positive, +1
-    Pos,
+    Pos = 1,
     /// Neutral, 0
-    Neu,
-    /// Negative, -2
-    Neg
+    Neu = 0,
+    /// Negative, -1
+    Neg = -1
+}
+
+pub enum Overflow {
+    PosOverflow,
+    None,
+    NegOverflow
 }
 
 impl Trit {
+    pub fn from_i8(val: i8) -> Self {
+        match val {
+            0 => Self::Neu,
+            -1 => Self::Neg,
+            1 => Self::Pos,
+            _ => Self::Neu
+        }
+    } 
+
     pub fn not(&self) -> Self {
         match self {
             Self::Pos => Self::Neg,
@@ -45,6 +60,21 @@ impl Trit {
 
     pub fn is_neu(&self) -> bool {
         *self == Self::Neu
+    }
+
+    /// Returns if an overflow occured(as a bool) and the resulting trit
+    pub fn add(&self, other: Trit) -> (Overflow, Trit) {
+        let base = *self as i8;
+        let other = other as i8;
+
+        let total = base + other;
+        if total > 1 {
+            (Overflow::PosOverflow, Self::from_i8(total))
+        } else if total < -1 {
+            (Overflow::NegOverflow, Self::from_i8(total))
+        } else {
+            (Overflow::None, Self::from_i8(total))
+        }
     }
 }
 
